@@ -1,21 +1,24 @@
 import ballerina/http;
 import ballerina/io;
 
-public function getCountries() returns error? {
-    // Create an HTTP client to call the REST Countries API
-    http:Client client = check new ("https://restcountries.com");
-
-    // Send a GET request to retrieve all countries data
-    http:Response response = check client->get("/v3.1/all");
-
-    // Get the JSON payload from the response
-    json jsonResponse = check response.getJsonPayload();
-
-    // Loop through the JSON array to extract country information
-    foreach var country in jsonResponse {
-        string isoCode = country.cca2.toString();
-        string name = country.name.common.toString();
-        // Print the iso_code and name in the desired format
-        io:println({iso_code: isoCode, name: name});
-    }
+type Album readonly & record {
+    string title;
+    string artist;
 };
+
+public function main() returns error? {
+    // Creates a new client with the Basic REST service URL.
+    http:Client albumClient = check new ("localhost:9090");
+
+    // Sends a `GET` request to the "/albums" resource.
+    // The verb is not mandatory as it is default to "GET".
+    Album[] albums = check albumClient->/albums;
+    io:println("GET request:" + albums.toJsonString());
+
+    // Sends a `POST` request to the "/albums" resource.
+    Album album = check albumClient->/albums.post({
+        title: "Sarah Vaughan and Clifford Brown",
+        artist: "Sarah Vaughan"
+    });
+    io:println("\nPOST request:" + album.toJsonString());
+}
