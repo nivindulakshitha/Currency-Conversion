@@ -8,6 +8,12 @@ public function getCountries() returns error? {
     json responseData = check resourceResponse.getJsonPayload();
 
     if responseData is json[] {
-        io:println("Countries:");
+    foreach json country in responseData {
+            json jsonCountry = country.toJson();
+            json|error isoCode = jsonCountry.cca2;
+            json|error name = jsonCountry.name.common;
+
+            io:println(isoCode, name);
+        }
     }
 }
