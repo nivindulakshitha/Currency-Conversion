@@ -1,11 +1,11 @@
 import ballerina/http;
 
 public type Country record {
-    json iso_code;
-    json country_name;
+    readonly string iso_code;
+    string country_name;
 };
 
-public final table<Country> country_list = table [];
+public final table<Country> key(iso_code) country_list = table [];
 
 public function getCountries() returns table<Country>?|error {
     http:Client resourceClient = check new ("https://restcountries.com");
@@ -16,11 +16,11 @@ public function getCountries() returns table<Country>?|error {
     if responseData is json[] {
         foreach json country in responseData {
             json jsonCountry = country.toJson();
-            json isoCode = check jsonCountry.cca2;
-            json name = check jsonCountry.name.common;
+            string isoCode = check jsonCountry.cca2;
+            string name = check jsonCountry.name.common;
 
             Country thisCountry = {
-                iso_code: isoCode,
+                iso_code: <string & readonly>isoCode,
                 country_name: name
             };
             country_list.add(thisCountry);
