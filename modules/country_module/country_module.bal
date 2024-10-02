@@ -1,13 +1,13 @@
 import ballerina/http;
 
-public type Country record {|
+public type Country record {
     json iso_code;
     json country_name;
-|};
+};
 
 public final table<Country> country_list = table [];
 
-public function getCountries() returns error|table<Country> {
+public function getCountries() returns table<Country>?|error {
     http:Client resourceClient = check new ("https://restcountries.com");
     http:Response resourceResponse = check resourceClient -> get("/v3.1/all");
 
@@ -28,6 +28,6 @@ public function getCountries() returns error|table<Country> {
 
         return country_list;
     } else {
-        return error("Could not get countries");
+        return null;
     }
 }
