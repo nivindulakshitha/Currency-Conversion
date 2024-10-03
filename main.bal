@@ -5,36 +5,14 @@ type Country record {
     json currencies;
 };
 
-type Countries record {|
-    Country[] searchData;
-|};
+service http:Service on new http:Listener(8080) {
+    resource function get countries() returns Country[]|error {
+        http:Client restCountires = check new ("https://restcountries.com");
+        Country[] search = check restCountires->get("/v3.1/all");
 
-// Global variable to store country data
-Countries? abc = null;
+        Country[] result = from Country country in search
+            select {name: check country.name.common, currencies: country.currencies};
 
-service /contries on new http:Listener(8080) {
-    resource function get contries() returns Country[]|error {
-        // Use 'if let' to safely access 'abc'
-        if let Countries nonNullData = abc {
-                // Correctly construct a Country type object in the 'select' clause
-                Country []             result = from Country country in nonNullData.searchData
-                select {
-                    name: country.name,
-                    currencies: country.currencies
-                };
-            return result;
-        } else {
-            return error("Country data not available yet.");
-        }
+        return result;
     }
-}
-
-public function main() returns error? {
-    http:Client restCountries = check new ("https://restcountries.com");
-
-    // Get the country data from the API
-    json[] searchData = check restCountries->get("/v3.1/all");
-
-    // Assign the retrieved data to 'abc'
-    abc = {searchData: <Country[]>searchData};
 }
