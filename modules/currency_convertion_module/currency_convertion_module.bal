@@ -1,15 +1,13 @@
 import ballerina/http;
-import ballerina/io;
+//import ballerina/io;
 
-configurable string api_key = "PLACE YOUR API KEY HERE";
-
-public function calculate(json conversion_properties) returns error|json {
+public function calculate(string api_key, json conversion_properties) returns error|json {
     final float from_amount = check conversion_properties.from_amount;
     final string from_currency = check conversion_properties.from_currency;
     final string to_currency = check conversion_properties.to_currency;
 
     http:Client client_instance = check new ("https://api.api-ninjas.com");
-    http:Request request = new ();
+    http:Request request = new;
 
     if (api_key != "PLACE YOUR API KEY HERE") {
         request.setHeader("X-Api-Key", api_key);
@@ -17,10 +15,13 @@ public function calculate(json conversion_properties) returns error|json {
         return error("Missing API key");
     }
 
-    string response_path = "/v1/convertcurrency?have=" + from_currency + "&want=" + to_currency + "&amount=" + from_amount.toString();
-    http:Response response = check client_instance->get(response_path, request);
+    map<string|string[]> queryParams = {
+        "X-Api-Key": api_key
+    };
 
-    json response_body = check response.getJsonPayload();
+    string path = "/v1/convertcurrency?have=" + from_currency + "&want=" + to_currency + "&amount="+ from_amount.toString();
 
-    return response_body;
+    json|http:ClientError response = check client_instance->get(path, queryParams, json);
+
+    return response;
 }
