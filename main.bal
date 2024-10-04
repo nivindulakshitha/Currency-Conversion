@@ -1,10 +1,13 @@
 import ballerina/http;
+//import ballerina/io;
 
 type Country record {
     json name;
     json cca;
     json currencies?;
 };
+
+configurable string api_key = "PLACE YOUR API KEY HERE";
 
 final isolated string[] currencies = [];
 isolated Country[] countryList = [];
