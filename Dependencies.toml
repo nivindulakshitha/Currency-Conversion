@@ -296,6 +296,6 @@ dependencies = [
 ]
 modules = [
 	{org = "nivindu_lakshitha", packageName = "Currency_Conversion", moduleName = "Currency_Conversion"},
-	{org = "nivindu_lakshitha", packageName = "Currency_Conversion", moduleName = "Currency_Conversion.country_module"}
+	{org = "nivindu_lakshitha", packageName = "Currency_Conversion", moduleName = "Currency_Conversion.currency_convertion_module"}
 ]
 
