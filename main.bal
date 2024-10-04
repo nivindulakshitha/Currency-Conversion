@@ -46,10 +46,13 @@ service http:Service on new http:Listener(8080) {
         }
     }
 
-    isolated resource function get isoname(string iso) returns string?|error {
+    isolated resource function get isoname(string iso) returns json?|error {
         lock {
-            if (iso_name_list.hasKey(iso)) {
-                return iso_name_list[iso];
+            if (iso_name_list.hasKey(iso.toLowerAscii())) {
+                return {
+                    name: iso_name_list[iso],
+                    iso: iso
+                };
             } else {
                 return error("No currency found for the given ISO code");
             }
@@ -57,11 +60,14 @@ service http:Service on new http:Listener(8080) {
         
     }
 
-    isolated resource function get isocode(string name) returns string?|error {
+    isolated resource function get isocode(string name) returns json?|error {
         lock {
             foreach string iso in iso_name_list.keys() {
                 if (iso_name_list[iso] == name.toLowerAscii()) {
-                    return iso;
+                    return {
+                        name: iso_name_list[iso],
+                        iso: iso
+                    };
                 }
             }
             return error("No currency found for the given name");
