@@ -2,31 +2,42 @@ import ballerina/http;
 
 type Country record {
     json name;
+    json cca;
     json currencies?;
 };
 
+isolated Country[] countryList = [];
+
 service http:Service on new http:Listener(8080) {
-    resource function get countries() returns Country[]|error {
-        http:Client restCountires = check new ("https://restcountries.com");
-        json[] search = check restCountires->get("/v3.1/all");
-
-        Country[] countryList = [];
-
-        foreach var item in search {
-            if item is map<anydata> {
-                json countryName = check item["name"]?.common ?: "Unknown Name";
-                json countryCurrencies = item.hasKey("currencies") ? item["currencies"] : {};
-
-                Country newCountry = {
-                    name: countryName,
-                    currencies: countryCurrencies
-                };
-
-                countryList.push(newCountry);
-
+    isolated resource function get countries() returns Country[]|error {
+        lock {
+            if (countryList.length() == 0) {
+                return error("No countries found");
+            } else {
+                return countryList.clone();
             }
         }
+    }
+}
 
-        return countryList;
+public function main() returns error? {
+    http:Client restCountires = check new ("https://restcountries.com");
+    json[] search = check restCountires->get("/v3.1/all");
+
+    foreach var item in search {
+        if item is map<anydata> {
+            json countryName = check item["name"]?.common ?: "Unknown Name";
+            json countryCurrencies = item.hasKey("currencies") ? item["currencies"] : {};
+            json cca3 = item.hasKey("cca3") ? item["cca3"] : "";
+
+            Country newCountry = {
+                name: countryName,
+                cca: cca3,
+                currencies: countryCurrencies
+            };
+            lock {
+                countryList.push(newCountry.clone());
+            }
+        }
     }
 }
