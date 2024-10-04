@@ -9,8 +9,6 @@ type Country record {
     json currencies?;
 };
 
-configurable string api_key = "PLACE YOUR API KEY HERE";
-
 final isolated string[] currencies = [];
 isolated Country[] countryList = [];
 
@@ -37,9 +35,15 @@ service http:Service on new http:Listener(8080) {
 }
 
 public function main() returns error? {
-    json returnData = check ccm:calculate();
+    json data = {
+        "from_amount": 5000,
+        "from_currency": "GBP",
+        "to_currency": "AUD"
+    };
+
+    json returnData = check ccm:calculate(data);
     io:println("HW", returnData);
-    
+
     http:Client restCountires = check new ("https://restcountries.com");
     json[] search = check restCountires->get("/v3.1/all");
 
