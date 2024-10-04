@@ -1,13 +1,14 @@
 import Currency_Conversion.currency_convertion_module as ccm;
 
 import ballerina/http;
-import ballerina/io;
 
 type Country record {
     json name;
     json cca;
     json currencies?;
 };
+
+configurable string api_key = "PLACE YOUR API KEY HERE";
 
 final isolated string[] currencies = [];
 isolated Country[] countryList = [];
@@ -32,18 +33,20 @@ service http:Service on new http:Listener(8080) {
             }
         }
     }
+
+    resource function get convert(string origin, string target, float amount) returns json|error {
+        json data = {
+        "from_amount": amount,
+        "from_currency": origin,
+        "to_currency": target
+    };
+
+    json returnData = check ccm:calculate(api_key, data);
+        return returnData;
+    }
 }
 
 public function main() returns error? {
-    json data = {
-        "from_amount": 5000,
-        "from_currency": "GBP",
-        "to_currency": "AUD"
-    };
-
-    json returnData = check ccm:calculate(data);
-    io:println("HW", returnData);
-
     http:Client restCountires = check new ("https://restcountries.com");
     json[] search = check restCountires->get("/v3.1/all");
 
