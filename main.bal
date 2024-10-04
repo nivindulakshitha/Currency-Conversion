@@ -46,6 +46,28 @@ service http:Service on new http:Listener(8080) {
         }
     }
 
+    isolated resource function get isoname(string iso) returns string?|error {
+        lock {
+            if (iso_name_list.hasKey(iso)) {
+                return iso_name_list[iso];
+            } else {
+                return error("No currency found for the given ISO code");
+            }
+        }
+        
+    }
+
+    isolated resource function get isocode(string name) returns string?|error {
+        lock {
+            foreach string iso in iso_name_list.keys() {
+                if (iso_name_list[iso] == name.toLowerAscii()) {
+                    return iso;
+                }
+            }
+            return error("No currency found for the given name");
+        }
+    }
+
     isolated resource function get convert(string origin, string target, float amount) returns json|error {
         json data = {
         "from_amount": amount,
@@ -83,7 +105,7 @@ public function main() returns error? {
                 foreach var currency_iso in countryCurrencies.keys() {
                     string currency_name = check countryCurrencies[currency_iso].name;
                     lock {
-                        iso_name_list[currency_iso] = currency_name;
+                        iso_name_list[currency_iso] = currency_name.toLowerAscii();
                     }
 
                     lock {
