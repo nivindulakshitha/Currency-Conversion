@@ -1,5 +1,4 @@
 import ballerina/http;
-//import ballerina/io;
 
 public function calculate(string api_key, json conversion_properties) returns error|json {
     final float from_amount = check conversion_properties.from_amount;
