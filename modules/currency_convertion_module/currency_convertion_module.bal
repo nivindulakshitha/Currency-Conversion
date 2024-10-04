@@ -1,6 +1,6 @@
 import ballerina/http;
 
-public function calculate(string api_key, json conversion_properties) returns error|json {
+public isolated function calculate(string api_key, json conversion_properties) returns error|json {
     final float from_amount = check conversion_properties.from_amount;
     final string from_currency = check conversion_properties.from_currency;
     final string to_currency = check conversion_properties.to_currency;

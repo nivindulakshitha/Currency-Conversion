@@ -34,7 +34,7 @@ service http:Service on new http:Listener(8080) {
         }
     }
 
-    resource function get convert(string origin, string target, float amount) returns json|error {
+    isolated resource function get convert(string origin, string target, float amount) returns json|error {
         json data = {
         "from_amount": amount,
         "from_currency": origin,
