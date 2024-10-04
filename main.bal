@@ -6,6 +6,7 @@ type Country record {
     json currencies?;
 };
 
+final isolated string[] currencies = [];
 isolated Country[] countryList = [];
 
 service http:Service on new http:Listener(8080) {
@@ -15,6 +16,16 @@ service http:Service on new http:Listener(8080) {
                 return error("No countries found");
             } else {
                 return countryList.clone();
+            }
+        }
+    }
+
+    isolated resource function get currencies() returns string[]|error {
+        lock {
+            if (currencies.length() == 0) {
+                return error("No currencies found");
+            } else {
+                return currencies.clone();
             }
         }
     }
@@ -37,6 +48,14 @@ public function main() returns error? {
             };
             lock {
                 countryList.push(newCountry.clone());
+            }
+
+            if countryCurrencies is map<anydata> {
+                foreach var currency in countryCurrencies.keys() {
+                    lock {
+                        currencies.push(currency);
+                    }
+                }
             }
         }
     }
