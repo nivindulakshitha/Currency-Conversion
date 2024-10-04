@@ -6,12 +6,18 @@ type Country record {
     json name;
     json cca;
     json currencies?;
+    json flags?;
 };
+
+type Iso_name record {|
+    string name;
+|};
 
 configurable string api_key = "PLACE YOUR API KEY HERE";
 
 final isolated string[] currencies = [];
 isolated Country[] countryList = [];
+isolated map<string> iso_name_list = {};
 
 service http:Service on new http:Listener(8080) {
     isolated resource function get countries() returns Country[]|error {
@@ -31,6 +37,12 @@ service http:Service on new http:Listener(8080) {
             } else {
                 return currencies.clone();
             }
+        }
+    }
+
+    isolated resource function get isonames() returns json|error {
+        lock {
+            return iso_name_list.clone();
         }
     }
 
@@ -55,20 +67,27 @@ public function main() returns error? {
             json countryName = check item["name"]?.common ?: "Unknown Name";
             json countryCurrencies = item.hasKey("currencies") ? item["currencies"] : {};
             json cca3 = item.hasKey("cca3") ? item["cca3"] : "";
+            json flags = item.hasKey("flags") ? item["flags"] : {};
 
             Country newCountry = {
                 name: countryName,
                 cca: cca3,
-                currencies: countryCurrencies
+                currencies: countryCurrencies,
+                flags: flags
             };
             lock {
                 countryList.push(newCountry.clone());
             }
 
             if countryCurrencies is map<anydata> {
-                foreach var currency in countryCurrencies.keys() {
+                foreach var currency_iso in countryCurrencies.keys() {
+                    string currency_name = check countryCurrencies[currency_iso].name;
                     lock {
-                        currencies.push(currency);
+                        iso_name_list[currency_iso] = currency_name;
+                    }
+
+                    lock {
+                        currencies.push(currency_iso);
                     }
                 }
             }
