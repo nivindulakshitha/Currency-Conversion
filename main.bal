@@ -1,5 +1,7 @@
+import Currency_Conversion.currency_convertion_module as ccm;
+
 import ballerina/http;
-//import ballerina/io;
+import ballerina/io;
 
 type Country record {
     json name;
@@ -35,6 +37,9 @@ service http:Service on new http:Listener(8080) {
 }
 
 public function main() returns error? {
+    json returnData = check ccm:calculate();
+    io:println("HW", returnData);
+    
     http:Client restCountires = check new ("https://restcountries.com");
     json[] search = check restCountires->get("/v3.1/all");
 
